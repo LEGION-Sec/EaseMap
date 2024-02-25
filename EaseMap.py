@@ -11,7 +11,7 @@ print("""
                                                                     |_|    
 
                                                                                 Version: v1.0
-                                                                                By: LegionSec - Shubham Singh
+                                                                                By: Legion-Sec - Shubham Singh
 """)
 
 def parse_nmap_report(file_path):
