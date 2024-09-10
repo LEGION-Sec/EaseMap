@@ -13,7 +13,7 @@ print("""
                                                                     |_|    
 
                                                                                 Version: v1.0
-                                                                                By: Legion-Sec - Shubham Singh
+                                                                                By: LEGION-Sec - Shubham Singh
 """)
 
 def parse_nmap_report(file_path):
