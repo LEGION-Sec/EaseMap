@@ -1,5 +1,7 @@
 import openpyxl
 import time
+import re
+
 
 print("\n\t")
 print("""
@@ -20,23 +22,26 @@ def parse_nmap_report(file_path):
 
     results = []
     current_result = None
+    pattern = "\d+/(tcp|udp)"
 
-    for line in lines:
+    for i, line in enumerate(lines):
         if line.startswith("Nmap scan report for "):
             if current_result:
                 results.append(current_result)
-            host = line.split()[-1].strip()
+            host = line.split()[-1].strip().replace('(','').replace(')','')
             current_result = {"Host": host, "Ports": []}
+        elif "TRACEROUTE" in line:
+            pass
         elif line.startswith("Device type: "):
             current_result["Device-Type"] = line.split(": ", 1)[1].strip()
         elif line.startswith("OS CPE: "):
             current_result["OS-CPE"] = line.split(": ", 1)[1].strip().split()
         elif line.startswith("Running (JUST GUESSING): "):
             current_result["OS-Guesses"] = line.split(": ", 1)[1].strip().split()
-        elif "/tcp" in line:
+        elif re.search(pattern, line):
             parts = line.split()
-            port, status, service = parts[0].split("/")[0], parts[1], parts[2]
-            current_result["Ports"].append({"Port": port, "Status": status, "Service": service})
+            port, status, service, version = parts[0].split("/")[0], parts[1], parts[2], ' '.join(parts[3:])
+            current_result["Ports"].append({"Port": port, "Status": status, "Service": service, "Version": version})
 
     if current_result:
         results.append(current_result)
@@ -47,7 +52,7 @@ def create_excel_file(results):
     workbook = openpyxl.Workbook()
     sheet = workbook.active
 
-    sheet.append(['Host', 'Port', 'Service', 'Status', 'Device-Type', 'OS-CPE', 'OS-Guesses'])
+    sheet.append(['Host', 'Port', 'Service', 'Version','Status', 'Device-Type', 'OS-CPE', 'OS-Guesses'])
 
     for result in results:
         host = result["Host"]
@@ -56,7 +61,7 @@ def create_excel_file(results):
         os_guesses = result.get("OS-Guesses", [])
 
         for port_info in result["Ports"]:
-            sheet.append([host, port_info["Port"], port_info["Service"], port_info["Status"],
+            sheet.append([host, port_info["Port"], port_info["Service"], port_info["Version"], port_info["Status"],
                           device_type, ', '.join(os_cpe), ', '.join(os_guesses)])
 
     excel_file_path = 'nmap_report.xlsx'
