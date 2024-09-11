@@ -32,6 +32,8 @@ def parse_nmap_report(file_path):
             current_result = {"Host": host, "Ports": []}
         elif "TRACEROUTE" in line:
             pass
+        elif "|" in line:
+            pass
         elif line.startswith("Device type: "):
             current_result["Device-Type"] = line.split(": ", 1)[1].strip()
         elif line.startswith("OS CPE: "):
